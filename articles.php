@@ -20,6 +20,14 @@ $articles = $pdo->query("SELECT * FROM articles")->fetchAll();
     <title>Полезная информация</title>
 </head>
 <body>
+<nav>
+        <ul>
+            <li><a href="index.php">Главная</a></li>
+            <li><a href="articles.php">Полезная информация</a></li>
+            <li><a href="tasks.php">Задачи</a></li>
+            <li><a href="admin.php">Администрирование</a></li>
+        </ul>
+    </nav>
     <h2>Статьи</h2>
     <form method="POST">
         <input type="text" name="title" placeholder="Название статьи" required>

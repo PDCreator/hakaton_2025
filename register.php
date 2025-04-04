@@ -1,25 +1,41 @@
 <?php
+session_start();
 require 'includes/db.php';
 
+$error = ""; // Инициализация переменной для ошибок
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $regLogin = $_POST['login'];
-    $fio = $_POST['fio'];
-    $regPassword = $_POST['password'];
-    $confirmPassword = $_POST['confirmPassword'];
+    if (isset($_POST['login'], $_POST['fio'], $_POST['password'], $_POST['confirmPassword'])) {
+        $regLogin = $_POST['login'];
+        $fio = $_POST['fio'];
+        $regPassword = md5($_POST['password']); // Хешируем пароль
+        $confirmPassword = $_POST['confirmPassword'];
 
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE login = :login");
-    $stmt->execute(['login' => $regLogin]);
+        // Проверка на существование пользователя
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE login = :login");
+        $stmt->execute(['login' => $regLogin]);
 
-    if ($stmt->rowCount() == 0 && $regPassword === $confirmPassword) {
-        $stmt = $pdo->prepare("INSERT INTO users (login, fio, password, role) VALUES (:login, :fio, :password, 'Пользователь')");
-        $stmt->execute(['login' => $regLogin, 'fio' => $fio, 'password' => md5($regPassword)]);
-        header('Location: login.php');
-        exit;
+        if ($stmt->rowCount() > 0) {
+            $error = "Такой пользователь уже существует."; // Сообщение об ошибке
+        } elseif ($regPassword !== md5($confirmPassword)) {
+            $error = "Пароли не совпадают."; // Проверка на совпадение паролей
+        } else {
+            // Вставка данных в базу
+            $stmt = $pdo->prepare("INSERT INTO users (login, fio, password, role) VALUES (:login, :fio, :password, 'Пользователь')");
+            $stmt->execute(['login' => $regLogin, 'fio' => $fio, 'password' => $regPassword]);
+
+            // Автоматическая авторизация
+            $_SESSION['user'] = $regLogin;
+            $_SESSION['fio'] = $fio; // Сохраняем ФИО пользователя
+            header('Location: index.php'); // Перенаправление на главную страницу
+            exit;
+        }
     } else {
-        $error = "Ошибка регистрации.";
+        $error = "Пожалуйста, заполните все поля."; // Если поля пустые
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -28,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Регистрация</title>
 </head>
 <body>
-    <form id="registrationForm" method="POST">
+    <form method="POST" action="register.php">
         <label for="regLogin">Логин:</label>
         <input type="text" id="regLogin" name="login" required pattern="[a-zA-Z]+">
 
@@ -42,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="password" id="confirmPassword" name="confirmPassword" required>
 
         <button type="submit">Регистрация</button>
-        <p><?php if (isset($error)) echo $error; ?></p>
+        <p><?php if (!empty($error)) echo $error; ?></p> <!-- Вывод сообщения об ошибке -->
     </form>
 </body>
 </html>
