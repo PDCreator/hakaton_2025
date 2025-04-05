@@ -13,49 +13,65 @@ if (isset($_GET['logout'])) {
 $errorLogin = ""; // Инициализация переменной для ошибок авторизации
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'], $_POST['password'])) {
     $login = $_POST['login'];
-    $password = md5($_POST['password']); // Хешируем пароль
+    $password = $_POST['password'];
 
-    // Проверка логина и пароля
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE login = :login AND password = :password");
-    $stmt->execute(['login' => $login, 'password' => $password]);
-
-    if ($stmt->rowCount() > 0) {
-        $user = $stmt->fetch();
-        $_SESSION['user'] = $login;
-        $_SESSION['fio'] = $user['fio']; // Сохраняем ФИО пользователя
-        header('Location: index.php'); // Перенаправление на главную страницу
-        exit;
+    if (strlen($password) < 8) {
+        $errorLogin = "Пароль слишком короткий."; // Сообщение об ошибке
     } else {
-        $errorLogin = "Некорректные данные. Проверьте логин и пароль."; // Сообщение об ошибке
+        $password = md5($password); // Хешируем пароль
+
+        // Проверка логина и пароля
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE login = :login AND password = :password");
+        $stmt->execute(['login' => $login, 'password' => $password]);
+
+        if ($stmt->rowCount() > 0) {
+            $user = $stmt->fetch();
+            $_SESSION['user'] = $login;
+            $_SESSION['fio'] = $user['fio']; // Сохраняем ФИО пользователя
+            header('Location: index.php'); // Перенаправление на главную страницу
+            exit;
+        } else {
+            $errorLogin = "Некорректные данные. Проверьте логин и пароль."; // Сообщение об ошибке
+        }
     }
 }
 
 // Обработка регистрации
 $errorRegister = ""; // Инициализация переменной для ошибок регистрации
+$showRegisterModal = false; // Флаг для показа модального окна регистрации
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fio'], $_POST['regPassword'], $_POST['confirmPassword'])) {
     $regLogin = $_POST['regLogin'];
     $fio = $_POST['fio'];
-    $regPassword = md5($_POST['regPassword']); // Хешируем пароль
+    $regPassword = $_POST['regPassword']; // Не хешируем сразу
     $confirmPassword = $_POST['confirmPassword'];
 
-    // Проверка на существование пользователя
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE login = :login");
-    $stmt->execute(['login' => $regLogin]);
-
-    if ($stmt->rowCount() > 0) {
-        $errorRegister = "Такой пользователь уже существует."; // Сообщение об ошибке
-    } elseif ($regPassword !== md5($confirmPassword)) {
+    if (strlen($regPassword) < 8) {
+        $errorRegister = "Пароль слишком короткий."; // Сообщение об ошибке
+        $showRegisterModal = true; // Показываем модальное окно
+    } elseif ($regPassword !== $confirmPassword) {
         $errorRegister = "Пароли не совпадают."; // Проверка на совпадение паролей
+        $showRegisterModal = true; // Показываем модальное окно
     } else {
-        // Вставка данных в базу
-        $stmt = $pdo->prepare("INSERT INTO users (login, fio, password, role) VALUES (:login, :fio, :password, 'Пользователь')");
-        $stmt->execute(['login' => $regLogin, 'fio' => $fio, 'password' => $regPassword]);
+        $regPassword = md5($regPassword); // Хешируем пароль
 
-        // Автоматическая авторизация
-        $_SESSION['user'] = $regLogin;
-        $_SESSION['fio'] = $fio; // Сохраняем ФИО пользователя
-        header('Location: index.php'); // Перенаправление на главную страницу
-        exit;
+        // Проверка на существование пользователя
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE login = :login");
+        $stmt->execute(['login' => $regLogin]);
+
+        if ($stmt->rowCount() > 0) {
+            $errorRegister = "Такой пользователь уже существует."; // Сообщение об ошибке
+            $showRegisterModal = true; // Показываем модальное окно
+        } else {
+            // Вставка данных в базу
+            $stmt = $pdo->prepare("INSERT INTO users (login, fio, password, role) VALUES (:login, :fio, :password, 'Пользователь')");
+            $stmt->execute(['login' => $regLogin, 'fio' => $fio, 'password' => $regPassword]);
+
+            // Автоматическая авторизация
+            $_SESSION['user'] = $regLogin;
+            $_SESSION['fio'] = $fio; // Сохраняем ФИО пользователя
+            header('Location: index.php'); // Перенаправление на главную страницу
+            exit;
+        }
     }
 }
 ?>
@@ -92,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
     <nav>
         <ul>
             <li><a href="index.php">Главная</a></li>
-            <li><a href="articles.php">Полезная информация</a></li>
+            <li><a href="articles/articles.php">Полезная информация</a></li>
             <li><a href="tasks.php">Задачи</a></li>
             <li><a href="admin.php">Администрирование</a></li>
         </ul>
@@ -110,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
     <?php endif; ?>
 
     <!-- Модальное окно для авторизации -->
-    <div id="loginModal" class="modal" style="<?php if (!empty($errorLogin)) echo 'display: block;'; ?>">
+    <div id="loginModal" class="modal">
         <div class="modal-content">
             <span onclick="closeModal('loginModal')" style="cursor:pointer; float:right;">&times;</span>
             <h2>Авторизация</h2>
@@ -119,8 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
                 <input type="text" id="login" name="login" required>
                 
                 <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" required>
-                
+                <input type="password" id="password" name="password" required minlength="8">
+                <p id="passwordError" style="color: red; display: none;">Пароль слишком короткий.</p>
+
                 <button type="submit">Вход</button>
                 <p><?php if (!empty($errorLogin)) echo $errorLogin; ?></p> <!-- Сообщение об ошибке -->
             </form>
@@ -128,11 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
     </div>
 
     <!-- Модальное окно для регистрации -->
-    <div id="registerModal" class="modal" style="<?php if (!empty($errorRegister)) echo 'display: block;'; ?>">
+    <div id="registerModal" class="modal" style="<?php if ($showRegisterModal) echo 'display: block;'; ?>">
         <div class="modal-content">
             <span onclick="closeModal('registerModal')" style="cursor:pointer; float:right;">&times;</span>
             <h2>Регистрация</h2>
-            <form method="POST" action="index.php"> <!-- Изменено на index.php -->
+            <form method="POST" action="index.php">
                 <label for="regLogin">Логин:</label>
                 <input type="text" id="regLogin" name="regLogin" required pattern="[a-zA-Z]+">
 
@@ -140,12 +157,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
                 <input type="text" id="fio" name="fio" required pattern="[А-Яа-яЁё\s]+">
 
                 <label for="regPassword">Пароль:</label>
-                <input type="password" id="regPassword" name="regPassword" required pattern="[a-zA-Z0-9!@#$%^&*]+">
+                <input type="password" id="regPassword" name="regPassword" required minlength="8">
+                <p id="regPasswordError" style="color: red; display: none;">Пароль слишком короткий.</p>
 
                 <label for="confirmPassword">Подтверждение пароля:</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
 
-                <button type="submit" name="register">Регистрация</button>
+                <button type="submit">Регистрация</button>
                 <p><?php if (!empty($errorRegister)) echo $errorRegister; ?></p> <!-- Сообщение об ошибке -->
             </form>
         </div>

@@ -17,15 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $user = $stmt->fetch();
             $_SESSION['user'] = $login;
             $_SESSION['fio'] = $user['fio']; // Сохраняем ФИО пользователя
+            $_SESSION['role'] = $user['role']; // Сохраняем роль пользователя
             header('Location: index.php'); // Перенаправление на главную страницу
             exit;
+        }
         } else {
             $error = "Некорректные данные. Проверьте логин и пароль."; // Сообщение об ошибке
         }
     } else {
         $error = "Пожалуйста, заполните все поля."; // Если поля пустые
     }
-}
+
 ?>
 
 <!DOCTYPE html>
