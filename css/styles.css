@@ -1,26 +1,58 @@
+@font-face {
+    font-family: 'Boldonse';
+    src: url('../fonts/Boldonse.ttf') format('truetype'); /* Укажите правильный путь к файлу */
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif; /* Используем новый шрифт */
+    background-image: url('../image/bg.png'); /* Путь к изображению */
+    background-size: cover; /* Заполняет весь экран */
+    background-position: center; /* Центрирует изображение */
+    background-repeat: no-repeat; /* Не повторяет изображение */
+    margin: 0; /* Убирает отступы по умолчанию */
+    height: 100vh; /* Задает высоту вьюпорта */
+    padding-left: 20px; /* Отступ слева */
+    font-weight: 700; /* Жирный текст */
+}
+::-webkit-scrollbar {
+    width: 20px; /* Ширина скроллбара */
+}
+
+::-webkit-scrollbar-track {
+    background: #ffe4b5; /* Цвет фона дорожки скроллбара */
+    border-radius: 50px; /* Скругление углов дорожки */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #f4b64b; /* Цвет ползунка */
+    border-radius: 50px; /* Скругление углов ползунка */
 }
 
 nav {
-    background: #333;
-    padding: 10px;
+    background: #D1B89B;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-left: 350px;
+    margin-right: 350px;
+    border-radius: 0 0 20px 20px; /* Округление нижних уголков */
 }
 
 nav ul {
     list-style: none;
+    padding: 0; /* Убираем отступы */
+    display: flex; /* Выравнивание кнопок в строку */
+    justify-content: center; /* Центрирование кнопок */
+    margin: 0; /* Убираем отступы */
 }
 
 nav ul li {
-    display: inline;
-    margin-right: 20px;
+    margin-right: 20px; /* Отступ между кнопками */
 }
 
 nav a {
-    color: white;
+    color: #FFF8E1;
     text-decoration: none;
 }
-
 h2 {
     color: #333;
 }
@@ -36,12 +68,7 @@ input, textarea, select {
     width: 100%;
 }
 
-button {
-    padding: 10px;
-    background: #28a745;
-    color: white;
-    border: none;
-}
+
 .context-menu {
     display: none;
     position: absolute;
@@ -67,4 +94,138 @@ button {
     display: block;
     margin-top: 20px;
     font-weight: bold;
+}
+
+
+
+.button-74 {
+    background-color: #fbeee0;
+    border: 2px solid #422800;
+    border-radius: 30px;
+    box-shadow: #422800 4px 4px 0 0;
+    color: #422800;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 0 18px;
+    line-height: 50px;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  
+  .button-74:hover {
+    background-color: #fff;
+  }
+  
+  .button-74:active {
+    box-shadow: #422800 2px 2px 0 0;
+    transform: translate(2px, 2px);
+  }
+  
+  @media (min-width: 768px) {
+    .button-74 {
+      min-width: 120px;
+      padding: 0 25px;
+    }
+  }
+  
+  .nav-menu {
+      list-style-type: none; /* Убираем маркеры списка */
+      padding: 0; /* Убираем отступы */
+      display: flex; /* Выравнивание кнопок в строку */
+      justify-content: space-around; /* Равномерное распределение пространства */
+  }
+
+  .button-74 {
+    background-color: #fbeee0;
+    border: 2px solid #422800;
+    border-radius: 30px;
+    box-shadow: #422800 4px 4px 0 0;
+    color: #422800;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 0 18px;
+    line-height: 50px;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    touch-action: manipulation;
+    margin-left: 10px;
+}
+
+.button-74:hover {
+    background-color: #fff;
+}
+
+.button-74:active {
+    box-shadow: #422800 2px 2px 0 0;
+    transform: translate(2px, 2px);
+}
+
+@media (min-width: 768px) {
+    .button-74 {
+        min-width: 120px;
+        padding: 0 25px;
+    }
+}
+
+
+.articles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Промежуток между карточками */
+    margin-top: 20px; /* Отступ сверху */
+}
+
+.article-tile {
+    background-color: #fbeee0; /* Цвет фона карточки */
+    border: 1px solid #ddd; /* Граница карточки */
+    border-radius: 8px; /* Закругленные углы */
+    padding: 15px; /* Отступ внутри карточки */
+    width: 390px; /* Фиксированная ширина карточки */
+    height: 350px; /* Фиксированная высота карточки */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Тень для глубины */
+    overflow: hidden; /* Скрывает все, что выходит за границы карточки */
+    transition: transform 0.2s; /* Анимация при наведении */
+}
+
+
+
+.article-tile:hover {
+    transform: scale(1.05); /* Увеличение при наведении */
+}
+
+.article-image {
+    max-width: 100%; /* Ширина изображения */
+    max-height: 150px; /* Ограничение высоты изображения */
+    height: auto; /* Автоматическая высота */
+    border-radius: 4px; /* Закругленные углы для изображения */
+    object-fit: cover; /* Обеспечивает правильное масштабирование изображения */
+}
+
+.article-actions {
+    margin-top: 10px; /* Отступ сверху для кнопок действий */
+    display: flex;
+}
+
+.edit-button, .delete-button {
+    display: inline-block; /* Кнопки в одну линию */
+    margin-right: 10px; /* Отступ между кнопками */
+    padding: 8px 12px; /* Отступ внутри кнопок */
+    background-color: #D1B89B; /* Цвет кнопки */
+    color: #FFF8E1; /* Цвет текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    border-radius: 4px; /* Закругленные углы кнопки */
+    display: flex
+;
+}
+
+.edit-button:hover, .delete-button:hover {
+    background-color: #D1B89B; /* Цвет кнопки при наведении */
 }

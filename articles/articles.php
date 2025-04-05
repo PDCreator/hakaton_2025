@@ -33,8 +33,8 @@ $articles = $stmt->fetchAll();
 
     <!-- Кнопки для создания статьи и просмотра истории изменений -->
     <div class="action-buttons">
-        <a href="create_article.php" class="button">Создать статью</a>
-        <a href="history.php" class="button">История изменений</a>
+        <a href="create_article.php" class="button-74">Создать статью</a>
+        <a href="history.php" class="button-74">История изменений</a>
     </div>
 
     <div class="articles">

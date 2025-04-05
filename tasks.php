@@ -165,6 +165,21 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
             text-align: left; 
             width: 100%; 
         }
+        input[type="text"], input[type="date"], textarea, select {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px; /* Ограничение максимальной ширины */
+        }
+        button {
+            padding: 10px;
+            background: #D1B89B; /* Цвет кнопки по умолчанию */
+            color: white;
+            border: none;
+            border-radius: 5px; /* Закругленные углы для кнопок */
+            cursor: pointer;
+        }
     </style>
     <script>
         function toggleMenu(id) {
@@ -238,7 +253,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
             </select>
             <?php $today = date('Y-m-d'); ?>
                 <input type="date" name="due_date" min="<?php echo $today; ?>" required>
-            <button type="submit">Создать задачу</button>
+            <button class="button-74" type="submit">Создать задачу</button>
         </form>
     <?php endif; ?>
 
@@ -256,7 +271,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
     <input type="text" name="search_assignee" placeholder="Ответственный (ФИО)"
         value="<?php echo htmlspecialchars($_GET['search_assignee'] ?? ''); ?>">
 
-    <button type="submit">🔍 Поиск</button>
+    <button class="button-74" type="submit">🔍 Поиск</button>
     <a href="tasks.php?status=<?php echo urlencode($_GET['status'] ?? 'Текущие'); ?>" style="margin-left: 10px;">
         ❌ Сбросить фильтр
     </a>
@@ -298,7 +313,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
         <p><strong>Ответственный:</strong> <?php echo htmlspecialchars($task['assignee_name'] ?? 'Неизвестно'); ?></p>
         <p><strong>Срок сдачи:</strong> <?php echo formatFriendlyDate($task['due_date']); ?></p>
 
-        <button class="menu-button" onclick="event.stopPropagation(); toggleMenu(<?php echo $task['id']; ?>)">⋮</button>
+        <button  class="menu-button" onclick="event.stopPropagation(); toggleMenu(<?php echo $task['id']; ?>)">⋮</button>
         <div class="context-menu" id="menu-<?php echo $task['id']; ?>">
             <form method="POST" style="margin: 0;">
                 <input type="hidden" name="action" value="update_status">

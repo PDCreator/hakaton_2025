@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
     <link rel="stylesheet" href="css/styles.css">
     <title>Главная страница</title>
     <style>
-        .modal {
+                .modal {
             display: none; 
             position: fixed; 
             z-index: 1; 
@@ -95,12 +95,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
             background-color: rgba(0,0,0,0.4); 
         }
         .modal-content {
-            background-color: #fefefe;
+            background-color:#fbeee0;
             margin: 15% auto; 
             padding: 20px;
             border: 1px solid #888;
             width: 80%; 
             max-width: 400px;
+            border-radius: 15px; /* Закругление углов модального окна */
+        }
+        .modal-content input {
+            width: calc(100% - 20px); /* Ширина полей с учетом отступов */
+            padding: 10px; /* Отступ внутри полей */
+            margin-bottom: 15px; /* Отступ между полями */
+            border: 1px solid #ccc; /* Граница полей */
+            border-radius: 5px; /* Закругление углов полей */
+        }
+        .modal-content button {
+            border-radius: 50px; /* Закругление углов кнопок */
+            margin-left: 130px;
         }
     </style>
 </head>
@@ -118,11 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
 
     <?php if (isset($_SESSION['fio'])): ?>
         <p>Здравствуйте, <?php echo htmlspecialchars($_SESSION['fio']); ?>!</p>
-        <button onclick="location.href='?logout'">Выйти</button>
+        <button class="button-74" onclick="location.href='?logout'">Выйти</button>
     <?php else: ?>
         <p>Пожалуйста, войдите в систему.</p>
-        <button onclick="openModal('loginModal')">Авторизация</button>
-        <button onclick="openModal('registerModal')">Регистрация</button>
+        <button class="button-74" onclick="openModal('loginModal')">Авторизация</button>
+        <button class="button-74" onclick="openModal('registerModal')">Регистрация</button>
     <?php endif; ?>
 
     <!-- Модальное окно для авторизации -->
@@ -138,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
                 <input type="password" id="password" name="password" required minlength="8">
                 <p id="passwordError" style="color: red; display: none;">Пароль слишком короткий.</p>
 
-                <button type="submit">Вход</button>
+                <button class="button-74" type="submit">Вход</button>
                 <p><?php if (!empty($errorLogin)) echo $errorLogin; ?></p> <!-- Сообщение об ошибке -->
             </form>
         </div>
@@ -163,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
                 <label for="confirmPassword">Подтверждение пароля:</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
 
-                <button type="submit">Регистрация</button>
+                <button class="button-74" type="submit">Регистрация</button>
                 <p><?php if (!empty($errorRegister)) echo $errorRegister; ?></p> <!-- Сообщение об ошибке -->
             </form>
         </div>
