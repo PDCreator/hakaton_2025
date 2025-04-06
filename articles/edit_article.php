@@ -61,6 +61,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <title>Редактировать статью</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.tiny.cloud/1/m2091v96csqx8le5h2smjv6va8o2okgd50ahor84g1wbi9os/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+    tinymce.init({
+        selector: 'textarea[name="content"]',
+        plugins: 'lists image link code',
+        toolbar: 'undo redo | bold italic underline | numlist bullist | image link | code',
+        menubar: false
+    });
+    </script>
 </head>
 <body>
 <nav>

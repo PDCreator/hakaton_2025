@@ -1,15 +1,16 @@
 <?php
 session_start();
 require '../includes/db.php'; // Путь к файлу подключения к базе данных
+
 // Проверка авторизации пользователя
 if (!isset($_SESSION['user'])) {
-    // Если пользователь не авторизован, редирект на страницу авторизации
-    header("Location: ../index.php"); // Замените на путь к вашей странице входа
+    header("Location: ../index.php"); // Перенаправление на страницу входа
     exit();
 }
+
 // Получение истории изменений
 $stmt = $pdo->query("
-    SELECT h.*, a.title, a.deleted, u.fio 
+    SELECT h.*, a.title, u.fio, a.deleted 
     FROM article_history h 
     JOIN articles a ON h.article_id = a.id 
     LEFT JOIN users u ON h.user_id = u.id 
@@ -17,6 +18,17 @@ $stmt = $pdo->query("
 ");
 
 $history = $stmt->fetchAll();
+
+// Создание массива для хранения последнего события "удаление" для каждой статьи
+$latestDeletions = [];
+foreach ($history as $entry) {
+    if ($entry['event'] === 'удаление') {
+        // Сохраняем только самую последнюю запись об удалении для каждой статьи
+        if (!isset($latestDeletions[$entry['article_id']]) || strtotime($entry['change_date']) > strtotime($latestDeletions[$entry['article_id']]['change_date'])) {
+            $latestDeletions[$entry['article_id']] = $entry;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +37,20 @@ $history = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>История изменений</title>
     <link rel="stylesheet" href="../css/styles.css">
-</head>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
 <nav>
@@ -55,11 +80,13 @@ $history = $stmt->fetchAll();
                 <td><?php echo htmlspecialchars($entry['title']); ?></td>
                 <td><?php echo htmlspecialchars($entry['event']); ?></td>
                 <td>
-                    <?php if ($entry['event'] == 'удаление' && isset($entry['deleted']) && $entry['deleted'] == 1 && strtotime($entry['change_date']) >= strtotime('-7 days')): ?>
+                    <?php if ($entry['deleted'] == 1 && isset($latestDeletions[$entry['article_id']]) && $latestDeletions[$entry['article_id']]['change_date'] === $entry['change_date']): ?>
                         <form method="POST" action="restore_article.php">
                             <input type="hidden" name="restore_id" value="<?php echo $entry['article_id']; ?>">
                             <button type="submit">Восстановить</button>
                         </form>
+                    <?php elseif ($entry['event'] === 'восстановление'): ?>
+                        
                     <?php endif; ?>
                 </td>
             </tr>

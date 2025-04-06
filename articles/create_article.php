@@ -64,6 +64,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <title>Создать статью</title>
     <link rel="stylesheet" href="../css/styles.css"> <!-- Обновленный путь -->
+    <script src="https://cdn.tiny.cloud/1/m2091v96csqx8le5h2smjv6va8o2okgd50ahor84g1wbi9os/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: 'textarea[name="content"]',
+            plugins: 'lists image link code',
+            toolbar: 'undo redo | bold italic underline | numlist bullist | image link | code',
+            menubar: false
+        });
+    </script>
+    <style>
+        input[type="text"], input[type="date"], textarea, select {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px; /* Ограничение максимальной ширины */
+        }
+    </style>
 </head>
 <body>
 <nav>

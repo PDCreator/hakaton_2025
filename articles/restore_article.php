@@ -1,12 +1,14 @@
 <?php
 session_start();
 require '../includes/db.php'; // Путь к файлу подключения к базе данных
+
 // Проверка авторизации пользователя
 if (!isset($_SESSION['user'])) {
-    // Если пользователь не авторизован, редирект на страницу авторизации
-    header("Location: ../index.php"); // Замените на путь к вашей странице входа
+    header("Location: ../index.php"); // Перенаправление на страницу входа
     exit();
 }
+
+// Получение информации о текущем пользователе
 $username = $_SESSION['user'];
 $stmtUser = $pdo->prepare("SELECT id, fio FROM users WHERE login = :username");
 $stmtUser->execute(['username' => $username]);
@@ -30,4 +32,3 @@ if (isset($_POST['restore_id'])) {
     header('Location: history.php'); // Перенаправление, если нет ID для восстановления
     exit();
 }
-?>

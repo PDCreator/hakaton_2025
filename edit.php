@@ -16,6 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $priority = $_POST['priority'];
     $due_date = $_POST['due_date'];
 
+    $image = $task['image']; // по умолчанию текущее изображение
+
+    if (!empty($_FILES['image']['name'])) {
+        $uploadDir = 'uploads/';
+        $uploadFile = $uploadDir . basename($_FILES['image']['name']);
+
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
+            $image = $_FILES['image']['name'];
+        } else {
+            echo "Ошибка загрузки изображения.";
+        }
+    }
+
+
     $username = $_SESSION['user'];
     $stmtUser = $pdo->prepare("SELECT id FROM users WHERE login = :username");
     $stmtUser->execute(['username' => $username]);
@@ -26,13 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $assignee_id = $stmtAssignee->fetchColumn();
 
     if ($id && $user_id && $assignee_id) {
-        $stmt = $pdo->prepare("UPDATE tasks SET title = :title, description = :description, assignee = :assignee, priority = :priority, due_date = :due_date WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE tasks SET title = :title, description = :description, assignee = :assignee, priority = :priority, due_date = :due_date, image = :image WHERE id = :id");
         $stmt->execute([
             'title' => $title,
             'description' => $description,
             'assignee' => $assignee_id,
             'priority' => $priority,
             'due_date' => $due_date,
+            'image' => $image,
             'id' => $id
         ]);
 
@@ -102,7 +117,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
         </ul>
     </nav>
     <h2>Редактировать задачу</h2>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?php echo $task['id']; ?>">
         <input type="text" name="title" placeholder="Название задачи" value="<?php echo htmlspecialchars($task['title']); ?>" required><br>
         <textarea id="description" name="description" placeholder="Описание задачи"><?php echo htmlspecialchars($task['description']); ?></textarea><br>
@@ -119,6 +134,8 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
             <option value="Высокий" <?php if ($task['priority'] === 'Высокий') echo 'selected'; ?>>Высокий</option>
         </select><br>
         <input type="date" name="due_date" value="<?php echo $task['due_date']; ?>" required><br>
+        <label for="image">Новое изображение:</label>
+        <input type="file" name="image" id="image"><br>
         <button type="submit">Сохранить изменения</button>
     </form>
 </body>

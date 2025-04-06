@@ -5,7 +5,6 @@ require 'includes/db.php';
 // Проверка, вошел ли пользователь в систему
 if (!isset($_SESSION['user'])) {
     die("У вас нет доступа к этому модулю.");
-
 }
 
 // Получение роли пользователя из базы данных
@@ -93,7 +92,7 @@ if (isset($_POST['editUser'])) {
     <link rel="stylesheet" href="css/styles.css">
     <title>Администрирование</title>
     <style>
-        .modal {
+                .modal {
             display: none; 
             position: fixed; 
             z-index: 1; 
@@ -105,19 +104,50 @@ if (isset($_POST['editUser'])) {
             background-color: rgba(0,0,0,0.4); 
         }
         .modal-content {
-            background-color: #fefefe;
+            background-color:#fbeee0;
             margin: 15% auto; 
             padding: 20px;
             border: 1px solid #888;
             width: 80%; 
             max-width: 400px;
+            border-radius: 15px; /* Закругление углов модального окна */
+        }
+        .modal-content input {
+            width: calc(100% - 20px); /* Ширина полей с учетом отступов */
+            padding: 10px; /* Отступ внутри полей */
+            margin-bottom: 15px; /* Отступ между полями */
+            border: 1px solid #ccc; /* Граница полей */
+            border-radius: 5px; /* Закругление углов полей */
+        }
+        .modal-content button {
+            border-radius: 50px; /* Закругление углов кнопок */
+            margin-left: 130px;
+        }
+        input[type="text"], input[type="date"], textarea, select {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 80%;
+            max-width: 400px; /* Ограничение максимальной ширины */
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
         }
     </style>
 </head>
 <body>
     <nav>
         <ul>
-        <li><a href="index.php">Главная</a></li>
+            <li><a href="index.php">Главная</a></li>
             <li><a href="articles/articles.php">Полезная информация</a></li>
             <li><a href="tasks.php">Задачи</a></li>
             <li><a href="admin.php">Администрирование</a></li>
@@ -126,7 +156,7 @@ if (isset($_POST['editUser'])) {
 
     <h1>Управление пользователями</h1>
 
-    <form method="POST" action="admin.php">
+<form method="POST" action="admin.php">
         <input type="text" name="filterLogin" placeholder="Логин" value="<?php echo htmlspecialchars($filterLogin); ?>">
         <input type="text" name="filterFio" placeholder="ФИО" value="<?php echo htmlspecialchars($filterFio); ?>">
         <select name="filterRole">
@@ -156,7 +186,7 @@ if (isset($_POST['editUser'])) {
                     <td><?php echo htmlspecialchars($user['role']); ?></td>
                     <td><?php echo htmlspecialchars($user['registration_date']); ?></td>
                     <td>
-                        <button onclick="openEditModal(<?php echo $user['id']; ?>)">Редактировать</button>
+                        <button onclick="openEditModal('<?php echo htmlspecialchars($user['id']); ?>', '<?php echo htmlspecialchars($user['login']); ?>', '<?php echo htmlspecialchars($user['fio']); ?>')">Редактировать</button>
                         <a href="admin.php?delete=<?php echo $user['id']; ?>">Удалить</a>
                         <button onclick="openChangePasswordModal(<?php echo $user['id']; ?>)">Сменить пароль</button>
                     </td>
@@ -202,9 +232,11 @@ if (isset($_POST['editUser'])) {
         </div>
     </div>
 
-    <script>
-        function openEditModal(userId) {
+<script>
+        function openEditModal(userId, login, fio) {
             document.getElementById('editUserId').value = userId;
+            document.getElementById('editLogin').value = login; // Заполнение поля логина
+            document.getElementById('editFio').value = fio; // Заполнение поля ФИО
             document.getElementById('editUserModal').style.display = 'block';
         }
 

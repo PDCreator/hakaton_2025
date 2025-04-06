@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
     <link rel="stylesheet" href="css/styles.css">
     <title>Главная страница</title>
     <style>
-                .modal {
+            .modal {
             display: none; 
             position: fixed; 
             z-index: 1; 

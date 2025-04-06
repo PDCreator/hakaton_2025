@@ -47,8 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_task'])) {
     $stmtUser->execute(['username' => $username]);
     $user_id = $stmtUser->fetchColumn();
 
-    $stmt = $pdo->prepare("INSERT INTO tasks (title, description, assignee, priority, status, created_at, due_date) 
-        VALUES (:title, :description, :assignee, :priority, :status, :created_at, :due_date)");
+    $image = $_FILES['image']['name'];
+    $targetDir = "uploads/";
+    $imagePath = "";
+
+    if ($image) {
+        $targetFile = $targetDir . basename($image);
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+            $imagePath = $image;
+        }
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO tasks (title, description, assignee, priority, status, created_at, due_date, image) 
+        VALUES (:title, :description, :assignee, :priority, :status, :created_at, :due_date, :image)");
     $stmt->execute([
         'title' => $title,
         'description' => $description,
@@ -56,7 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_task'])) {
         'priority' => $priority,
         'status' => $status,
         'created_at' => $created_at,
-        'due_date' => $due_date
+        'due_date' => $due_date,
+        'image' => $imagePath,
     ]);
 
     // Получаем ID только что вставленной задачи
@@ -234,7 +246,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
     </div>
     
     <?php if ($status !== 'Выполненные'): ?>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="create_task" value="1">
             <input type="text" name="title" placeholder="Название задачи" required>
             <textarea id="description" name="description" placeholder="Описание задачи"></textarea>
@@ -254,10 +266,11 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
             <?php $today = date('Y-m-d'); ?>
                 <input type="date" name="due_date" min="<?php echo $today; ?>" required>
             <button class="button-74" type="submit">Создать задачу</button>
+            <input type="file" id="image" name="image">
         </form>
     <?php endif; ?>
 
-    <div class="task-list">
+    
         <!-- 🔍 Форма поиска -->
         <form method="GET" style="margin: 20px 0;">
     <input type="hidden" name="status" value="<?php echo htmlspecialchars($_GET['status'] ?? 'Текущие'); ?>">
@@ -302,44 +315,98 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
         }
     ?>
 
-
+<div class="articles">
     <?php 
-        $status = $_GET['status'] ?? 'Текущие';
-        $tasks = $status === 'Отложенные' ? $delayed_tasks : ($status === 'Выполненные' ? $completed_tasks : $current_tasks);        
-        foreach ($tasks as $task): ?>
-            <div class="task-card" onclick="toggleDetails(this)">
-    <div class="task-summary">
-        <h3><?php echo htmlspecialchars($task['title']); ?></h3>
-        <p><strong>Ответственный:</strong> <?php echo htmlspecialchars($task['assignee_name'] ?? 'Неизвестно'); ?></p>
-        <p><strong>Срок сдачи:</strong> <?php echo formatFriendlyDate($task['due_date']); ?></p>
+    $status = $_GET['status'] ?? 'Текущие';
+    $tasks = $status === 'Отложенные' ? $delayed_tasks : ($status === 'Выполненные' ? $completed_tasks : $current_tasks);        
+    foreach ($tasks as $task): ?>
+    
+        <div class="article-tile" onclick="toggleDetails(this)">    
+            <!-- Кнопка контекстного меню -->
+            <button class="menu-button" onclick="event.stopPropagation(); toggleMenu(<?php echo $task['id']; ?>)">⋮</button>
 
-        <button  class="menu-button" onclick="event.stopPropagation(); toggleMenu(<?php echo $task['id']; ?>)">⋮</button>
-        <div class="context-menu" id="menu-<?php echo $task['id']; ?>">
-            <form method="POST" style="margin: 0;">
-                <input type="hidden" name="action" value="update_status">
-                <input type="hidden" name="task_id" value="<?php echo $task['id']; ?>">
-                <?php if ($status === 'Текущие'): ?>
-                    <button name="new_status" value="Отложенные">Отложить</button>
-                    <button name="new_status" value="Выполненные">Выполнить</button>
-                <?php elseif ($status === 'Отложенные'): ?>
-                    <button name="new_status" value="Текущие">Вернуть в работу</button>
-                    <button name="new_status" value="Выполненные">Выполнить</button>
-                <?php elseif ($status === 'Выполненные'): ?>
-                    <button name="new_status" value="Текущие">Вернуть в работу</button>
+            <div class="task-summary">
+                <h3><?php echo htmlspecialchars($task['title']); ?></h3>
+                <p><strong>Ответственный:</strong> <?php echo htmlspecialchars($task['assignee_name'] ?? 'Неизвестно'); ?></p>
+                <p><strong>Срок сдачи:</strong> <?php echo formatFriendlyDate($task['due_date']); ?></p>
+
+                <!-- Контекстное меню -->
+                <div class="context-menu" id="menu-<?php echo $task['id']; ?>">
+                    <form method="POST" style="margin: 0;">
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="task_id" value="<?php echo $task['id']; ?>">
+                        <?php if ($status === 'Текущие'): ?>
+                            <button name="new_status" value="Отложенные">Отложить</button>
+                            <button name="new_status" value="Выполненные">Выполнить</button>
+                        <?php elseif ($status === 'Отложенные'): ?>
+                            <button name="new_status" value="Текущие">Вернуть в работу</button>
+                            <button name="new_status" value="Выполненные">Выполнить</button>
+                        <?php elseif ($status === 'Выполненные'): ?>
+                            <button name="new_status" value="Текущие">Вернуть в работу</button>
+                        <?php endif; ?>
+                        <button formaction="edit.php" formmethod="GET" name="id" value="<?php echo $task['id']; ?>">Редактировать</button>
+                        <button formaction="delete.php" formmethod="POST" name="id" value="<?php echo $task['id']; ?>">Удалить</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="task-details">
+                <p><strong>Описание:</strong> <?php echo $task['description']; ?></p>
+                <p><strong>Дата создания:</strong> <?php echo formatFriendlyDate($task['created_at'], true); ?></p>
+                <p><strong>Приоритет:</strong> <?php echo $task['priority']; ?></p>
+                <?php if (!empty($task['image'])): ?>
+                    <img src="uploads/<?php echo htmlspecialchars($task['image']); ?>" alt="Изображение задачи" class="article-image">
                 <?php endif; ?>
-                <button formaction="edit.php" formmethod="GET" name="id" value="<?php echo $task['id']; ?>">Редактировать</button>
-                <button formaction="delete.php" formmethod="POST" name="id" value="<?php echo $task['id']; ?>">Удалить</button>
-            </form>
+            </div>
         </div>
-    </div>
 
-    <div class="task-details" style="display: none;">
-        <p><strong>Описание:</strong> <?php echo $task['description']; ?></p>
-        <p><strong>Дата создания:</strong> <?php echo formatFriendlyDate($task['created_at'], true); ?></p>
-        <p><strong>Приоритет:</strong> <?php echo $task['priority']; ?></p>
-    </div>
+    <?php endforeach; ?>
 </div>
-        <?php endforeach; ?>
-    </div>
+
+    <style>
+    .task-details {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease, padding 0.5s ease;
+        padding: 0 10px;
+    }
+
+    .task-card.expanded .task-details {
+        padding: 10px;
+    }
+</style>
+
+<script>
+    let expandedCard = null;
+
+    function toggleDetails(card) {
+        if (expandedCard && expandedCard !== card) {
+            expandedCard.classList.remove('expanded');
+            expandedCard.querySelector('.task-details').style.maxHeight = null;
+        }
+
+        const details = card.querySelector('.task-details');
+        const isExpanded = card.classList.contains('expanded');
+
+        if (isExpanded) {
+            // Сворачиваем текущую карточку
+            details.style.maxHeight = null;
+            card.classList.remove('expanded');
+            expandedCard = null;
+        } else {
+            // Разворачиваем текущую карточку
+            card.classList.add('expanded');
+            details.style.maxHeight = details.scrollHeight + "px";
+            expandedCard = card;
+
+            // Прокрутка с небольшой задержкой для плавности
+            setTimeout(() => {
+                const cardTop = card.getBoundingClientRect().top + window.scrollY - 20;
+                window.scrollTo({ top: cardTop, behavior: 'smooth' });
+            }, 100);
+        }
+    }
+</script>
+
 </body>
 </html>
