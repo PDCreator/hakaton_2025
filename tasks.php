@@ -140,15 +140,8 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
     <link rel="stylesheet" href="css/styles.css">
     <title>Задачи</title>
     <style>
-        .task-card {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
-            position: relative;
-            cursor: pointer;
-        }
 
-        .task-card .menu-button {
+        .menu-button {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -239,10 +232,10 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
 
 
     <div class="tabs">
-        <a href="?status=Текущие">Текущие задачи (<?php echo count($current_tasks); ?>)</a>
-        <a href="?status=Отложенные">Отложенные задачи (<?php echo count($delayed_tasks); ?>)</a>
-        <a href="?status=Выполненные">Выполненные задачи</a>
-        <a href="history.php">📜 История изменений</a>
+        <a href="?status=Текущие" class="button-74">Текущие задачи (<?php echo count($current_tasks); ?>)</a>
+        <a href="?status=Отложенные" class="button-74">Отложенные задачи (<?php echo count($delayed_tasks); ?>)</a>
+        <a href="?status=Выполненные" class="button-74">Выполненные задачи</a>
+        <a href="history.php" class="button-74">📜 История изменений</a>
     </div>
     
     <?php if ($status !== 'Выполненные'): ?>
@@ -265,8 +258,8 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
             </select>
             <?php $today = date('Y-m-d'); ?>
                 <input type="date" name="due_date" min="<?php echo $today; ?>" required>
+                <input type="file" id="image" name="image">
             <button class="button-74" type="submit">Создать задачу</button>
-            <input type="file" id="image" name="image">
         </form>
     <?php endif; ?>
 
@@ -285,7 +278,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
         value="<?php echo htmlspecialchars($_GET['search_assignee'] ?? ''); ?>">
 
     <button class="button-74" type="submit">🔍 Поиск</button>
-    <a href="tasks.php?status=<?php echo urlencode($_GET['status'] ?? 'Текущие'); ?>" style="margin-left: 10px;">
+    <a href="tasks.php?status=<?php echo urlencode($_GET['status'] ?? 'Текущие'); ?>" style="margin-left: 10px;" class="button-74">
         ❌ Сбросить фильтр
     </a>
 </form>

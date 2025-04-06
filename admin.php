@@ -4,7 +4,8 @@ require 'includes/db.php';
 
 // Проверка, вошел ли пользователь в систему
 if (!isset($_SESSION['user'])) {
-    die("У вас нет доступа к этому модулю.");
+    header("Location: index.php"); // Редирект на страницу входа
+    exit();
 }
 
 // Получение роли пользователя из базы данных
@@ -13,7 +14,8 @@ $stmt->execute(['login' => $_SESSION['user']]);
 $user = $stmt->fetch();
 
 if (!$user || $user['role'] !== 'Администратор') {
-    die("У вас нет доступа к этому модулю.");
+    header("Location: index.php"); // Редирект на страницу входа
+    exit();
 }
 
 // Получение списка пользователей
@@ -55,20 +57,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['filter'])) {
 }
 
 // Обработка удаления пользователя
-if (isset($_GET['delete'])) {
+if (isset($_POST['delete'])) {
     $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
-    $stmt->execute(['id' => $_GET['delete']]);
+    $stmt->execute(['id' => $_POST['delete']]);
     header('Location: admin.php');
     exit;
 }
 
-// Обработка изменения пароля
+// Обработка смены пароля
 if (isset($_POST['changePassword'])) {
-    $newPassword = md5($_POST['newPassword']);
-    $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
-    $stmt->execute(['password' => $newPassword, 'id' => $_POST['userId']]);
-    header('Location: admin.php');
-    exit;
+    $userId = $_POST['userId'];
+    $newPassword = $_POST['newPassword'];
+    $currentPassword = md5($_POST['confirmPassword']); // Хешируем текущий пароль
+
+    // Проверка текущего пароля
+    $stmt = $pdo->prepare("SELECT password FROM users WHERE id = :id");
+    $stmt->execute(['id' => $userId]);
+    $userData = $stmt->fetch();
+
+    if ($userData['password'] !== $currentPassword) {
+        $errorMessage = "Текущий пароль введен неверно"; // Сообщение об ошибке
+        echo "<script>window.onload = function() { 
+            document.getElementById('changePasswordModal').style.display = 'block'; 
+            document.getElementById('passwordError').innerText = '$errorMessage'; 
+        };</script>";
+    } else {
+        $hashedPassword = md5($newPassword);
+        $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
+        $stmt->execute(['password' => $hashedPassword, 'id' => $userId]);
+        header('Location: admin.php');
+        exit;
+    }
 }
 
 // Обработка редактирования пользователя
@@ -92,7 +111,7 @@ if (isset($_POST['editUser'])) {
     <link rel="stylesheet" href="css/styles.css">
     <title>Администрирование</title>
     <style>
-                .modal {
+        .modal {
             display: none; 
             position: fixed; 
             z-index: 1; 
@@ -123,12 +142,19 @@ if (isset($_POST['editUser'])) {
             border-radius: 50px; /* Закругление углов кнопок */
             margin-left: 130px;
         }
-        input[type="text"], input[type="date"], textarea, select {
-            display: block;
-            margin: 10px 0;
-            padding: 10px;
-            width: 80%;
-            max-width: 400px; /* Ограничение максимальной ширины */
+        input {
+
+        }
+        
+        .filter-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .filter-container input, .filter-container select {
+            margin-right: 10px; /* Отступ между полями фильтра */
+            margin-bottom: 0; /* Убираем отступ снизу */
         }
         table {
             border-collapse: collapse;
@@ -141,6 +167,37 @@ if (isset($_POST['editUser'])) {
         }
         th {
             background: #f0f0f0;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+  .form1 {
+    max-width: 1000px;
+    display: flex;
+}
+
+.form1 input[type="text"], 
+.form1 input[type="date"], 
+.form1 select {
+    flex: 1; /* Поля занимают равное пространство */
+}
+
+.form1 button {
+    flex: 0 0 calc(20% - 30px); /* Кнопка занимает меньше места на 30px */
+    margin-left: 10px; /* Отступ между кнопкой и предыдущими полями */
+}
+
+        .in1{
+            margin-right: 15px;
+        }
+        .in2{
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+        .in3{
+            margin-right: 15px;
+            width:250px;
         }
     </style>
 </head>
@@ -156,16 +213,16 @@ if (isset($_POST['editUser'])) {
 
     <h1>Управление пользователями</h1>
 
-<form method="POST" action="admin.php">
-        <input type="text" name="filterLogin" placeholder="Логин" value="<?php echo htmlspecialchars($filterLogin); ?>">
-        <input type="text" name="filterFio" placeholder="ФИО" value="<?php echo htmlspecialchars($filterFio); ?>">
+    <form class = "form1" method="POST" action="admin.php" class="filter-container">
+        <input class= "in1" type="text" name="filterLogin" placeholder="Логин" value="<?php echo htmlspecialchars($filterLogin); ?>">
+        <input class= "in3" type="text" name="filterFio" placeholder="ФИО" value="<?php echo htmlspecialchars($filterFio); ?>">
         <select name="filterRole">
-            <option value="">Все роли</option>
+            <option class= "in1" value="">Все роли</option>
             <option value="Пользователь" <?php if ($filterRole == 'Пользователь') echo 'selected'; ?>>Пользователь</option>
             <option value="Администратор" <?php if ($filterRole == 'Администратор') echo 'selected'; ?>>Администратор</option>
         </select>
-        <input type="date" name="filterDate" value="<?php echo htmlspecialchars($filterDate); ?>">
-        <button type="submit" name="filter">Фильтровать</button>
+        <input class= "in2" type="date" name="filterDate" value="<?php echo htmlspecialchars($filterDate); ?>">
+        <button class="button-75" type="submit" name="filter">Фильтровать</button>
     </form>
 
     <table>
@@ -187,7 +244,10 @@ if (isset($_POST['editUser'])) {
                     <td><?php echo htmlspecialchars($user['registration_date']); ?></td>
                     <td>
                         <button onclick="openEditModal('<?php echo htmlspecialchars($user['id']); ?>', '<?php echo htmlspecialchars($user['login']); ?>', '<?php echo htmlspecialchars($user['fio']); ?>')">Редактировать</button>
-                        <a href="admin.php?delete=<?php echo $user['id']; ?>">Удалить</a>
+                        <form method="POST" action="admin.php" style="display:inline;">
+                            <input type="hidden" name="delete" value="<?php echo $user['id']; ?>">
+                            <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?');">Удалить</button>
+                        </form>
                         <button onclick="openChangePasswordModal(<?php echo $user['id']; ?>)">Сменить пароль</button>
                     </td>
                 </tr>
@@ -225,14 +285,15 @@ if (isset($_POST['editUser'])) {
                 <input type="hidden" name="userId" id="changeUserId">
                 <label for="newPassword">Новый пароль:</label>
                 <input type="password" name="newPassword" required>
-                <label for="confirmPassword">Подтверждение пароля:</label>
+                <label for="confirmPassword">Текущий пароль:</label>
                 <input type="password" name="confirmPassword" required>
                 <button type="submit" name="changePassword">Сохранить</button>
+                <p id="passwordError" class="error-message"></p> <!-- Сообщение об ошибке -->
             </form>
         </div>
     </div>
 
-<script>
+    <script>
         function openEditModal(userId, login, fio) {
             document.getElementById('editUserId').value = userId;
             document.getElementById('editLogin').value = login; // Заполнение поля логина
@@ -243,6 +304,7 @@ if (isset($_POST['editUser'])) {
         function openChangePasswordModal(userId) {
             document.getElementById('changeUserId').value = userId;
             document.getElementById('changePasswordModal').style.display = 'block';
+            document.getElementById('passwordError').innerText = ''; // Сброс сообщения об ошибке
         }
 
         function closeModal(modalId) {

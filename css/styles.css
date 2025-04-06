@@ -140,30 +140,31 @@ input, textarea, select {
       justify-content: space-around; /* Равномерное распределение пространства */
   }
 
-  .button-74 {
+  .button-75 {
     background-color: #fbeee0;
-    border: 2px solid #422800;
+    border: 3px solid #422800;
     border-radius: 30px;
-    box-shadow: #422800 4px 4px 0 0;
+    
     color: #422800;
     cursor: pointer;
     display: inline-block;
     font-weight: 600;
     font-size: 18px;
-    padding: 0 18px;
+    padding: 0 1px;
     line-height: 50px;
     text-align: center;
     text-decoration: none;
     user-select: none;
     touch-action: manipulation;
     margin-left: 10px;
-}
-
-.button-74:hover {
+    height: 50px;
+    
+  }
+.button-75:hover {
     background-color: #fff;
 }
 
-.button-74:active {
+.button-75:active {
     box-shadow: #422800 2px 2px 0 0;
     transform: translate(2px, 2px);
 }
@@ -214,9 +215,7 @@ input, textarea, select {
     display: block;
 }
 
-.article-tile:hover {
-    transform: scale(1.05); /* Увеличение при наведении */
-}
+
 
 .article-image {
     max-width: 100%; /* Ширина изображения */
@@ -274,4 +273,14 @@ input, textarea, select {
 /* При развороте, остальным плиткам сбрасываем z-index */
 .article-tile:not(.expanded) {
     z-index: 1;
+}
+.main_input{
+    width: 250px;
+}
+
+.tox-tinymce {
+    max-width: 600px;
+    max-height: 300px;
+    min-height: 150px;
+    margin-top: 10px;
 }
