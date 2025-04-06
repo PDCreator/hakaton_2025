@@ -136,7 +136,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
         <input type="date" name="due_date" value="<?php echo $task['due_date']; ?>" required><br>
         <label for="image">Новое изображение:</label>
         <input type="file" name="image" id="image"><br>
-        <button type="submit">Сохранить изменения</button>
+        <button class="button-74" type="submit">Сохранить изменения</button>
     </form>
 </body>
 </html>

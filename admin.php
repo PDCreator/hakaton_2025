@@ -68,26 +68,23 @@ if (isset($_POST['delete'])) {
 if (isset($_POST['changePassword'])) {
     $userId = $_POST['userId'];
     $newPassword = $_POST['newPassword'];
-    $currentPassword = md5($_POST['confirmPassword']); // Хешируем текущий пароль
-
-    // Проверка текущего пароля
-    $stmt = $pdo->prepare("SELECT password FROM users WHERE id = :id");
-    $stmt->execute(['id' => $userId]);
-    $userData = $stmt->fetch();
-
-    if ($userData['password'] !== $currentPassword) {
-        $errorMessage = "Текущий пароль введен неверно"; // Сообщение об ошибке
-        echo "<script>window.onload = function() { 
-            document.getElementById('changePasswordModal').style.display = 'block'; 
-            document.getElementById('passwordError').innerText = '$errorMessage'; 
-        };</script>";
-    } else {
+    $confirmPassword = $_POST['confirmPassword']; // Хешируем текущий пароль
+    
+    if (strlen($newPassword) < 8) {
+        header("Location: admin.php?shortPassword=1&userId=" . urlencode($userId));
+        exit;
+    }
+    if ($confirmPassword == $newPassword){
         $hashedPassword = md5($newPassword);
         $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
         $stmt->execute(['password' => $hashedPassword, 'id' => $userId]);
         header('Location: admin.php');
         exit;
+    }else{
+        header("Location: admin.php?password_mismatch=1&userId=" . urlencode($userId));
+        exit;
     }
+    
 }
 
 // Обработка редактирования пользователя
@@ -285,7 +282,7 @@ if (isset($_POST['editUser'])) {
                 <input type="hidden" name="userId" id="changeUserId">
                 <label for="newPassword">Новый пароль:</label>
                 <input type="password" name="newPassword" required>
-                <label for="confirmPassword">Текущий пароль:</label>
+                <label for="confirmPassword">Подтверждение пароля:</label>
                 <input type="password" name="confirmPassword" required>
                 <button type="submit" name="changePassword">Сохранить</button>
                 <p id="passwordError" class="error-message"></p> <!-- Сообщение об ошибке -->
@@ -316,6 +313,26 @@ if (isset($_POST['editUser'])) {
                 event.target.style.display = 'none';
             }
         }
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const passwordMismatch = urlParams.get('password_mismatch');
+            const shortPassword = urlParams.get('shortPassword');
+            const userId = urlParams.get('userId');
+
+            if (passwordMismatch === '1' && userId) {
+                // Открываем модалку смены пароля
+                openChangePasswordModal(userId);
+                // Показываем сообщение об ошибке
+                document.getElementById('passwordError').innerText = 'Пароли не совпадают!';
+            }
+            if (shortPassword === '1' && userId) {
+                // Открываем модалку смены пароля
+                openChangePasswordModal(userId);
+                // Показываем сообщение об ошибке
+                document.getElementById('passwordError').innerText = 'Короткий пароль!';
+            }
+        };
+
     </script>
 </body>
 </html>

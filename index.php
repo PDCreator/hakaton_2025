@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
             <button class="button-74" onclick="toggleRegisterForm()">Зарегистрироваться</button>
         </div>
 
-        <div id="registerForm" style="display: <?php echo $showRegisterForm ? 'block' : 'none'; ?>;">
+        <div id="registerForm" style="display: none;"> <!-- Скрываем форму регистрации по умолчанию -->
             <h2>Регистрация</h2>
             <form method="POST" action="index.php">
                 <label for="regLogin">Логин:</label>
@@ -128,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['regLogin'], $_POST['fi
                 <button class="button-74" type="submit">Регистрация</button>
                 <p><?php if (!empty($errorRegister)) echo $errorRegister; ?></p> <!-- Сообщение об ошибке -->
             </form>
+            <button class="button-74" onclick="toggleRegisterForm()">Уже есть аккаунт? Войти</button> <!-- Кнопка для возврата к форме авторизации -->
         </div>
     <?php endif; ?>
 

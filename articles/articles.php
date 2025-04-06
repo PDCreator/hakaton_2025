@@ -99,7 +99,7 @@ $articles = $stmt->fetchAll();
                 <img src="../uploads/<?php echo htmlspecialchars($article['image']); ?>" alt="Изображение статьи" class="article-image" />
             <?php endif; ?>
             <div class="article-full-content">
-                <?php echo nl2br(htmlspecialchars($article['content'] ?? 'Описание отсутствует.')); ?>
+                <?php echo nl2br($article['content'] ?? 'Описание отсутствует.'); ?>
             </div>
             <div class="article-actions">
                 <a href="edit_article.php?id=<?php echo $article['id']; ?>" class="edit-button">Редактировать</a>

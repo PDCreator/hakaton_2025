@@ -170,21 +170,8 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
             text-align: left; 
             width: 100%; 
         }
-        input[type="text"], input[type="date"], textarea, select {
-            display: block;
-            margin: 10px 0;
-            padding: 10px;
-            width: 100%;
-            max-width: 400px; /* Ограничение максимальной ширины */
-        }
-        button {
-            padding: 10px;
-            background: #D1B89B; /* Цвет кнопки по умолчанию */
-            color: white;
-            border: none;
-            border-radius: 5px; /* Закругленные углы для кнопок */
-            cursor: pointer;
-        }
+       
+       
     </style>
     <script>
         function toggleMenu(id) {
@@ -241,17 +228,17 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
     <?php if ($status !== 'Выполненные'): ?>
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="create_task" value="1">
-            <input type="text" name="title" placeholder="Название задачи" required>
+            <input class="edit_input" type="text" name="title" placeholder="Название задачи" required>
             <textarea id="description" name="description" placeholder="Описание задачи"></textarea>
 
-            <input type="text" name="assignee" placeholder="Ответственный (ФИО)" list="assignees" required>
+            <input class="edit_input" type="text" name="assignee" placeholder="Ответственный (ФИО)" list="assignees" required>
             <datalist id="assignees">
                 <?php foreach ($users as $fio): ?>
                     <option value="<?php echo htmlspecialchars($fio); ?>"></option>
                 <?php endforeach; ?>
             </datalist>
 
-            <select name="priority" required>
+            <select class="edit_input" name="priority" required>
                 <option value="Низкий">Низкий</option>
                 <option value="Средний">Средний</option>
                 <option value="Высокий">Высокий</option>
@@ -367,6 +354,7 @@ $users = $pdo->query("SELECT fio FROM users")->fetchAll(PDO::FETCH_COLUMN);
     .task-card.expanded .task-details {
         padding: 10px;
     }
+ 
 </style>
 
 <script>

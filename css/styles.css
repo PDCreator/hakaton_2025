@@ -65,7 +65,7 @@ input, textarea, select {
     display: block;
     margin: 10px 0;
     padding: 10px;
-    width: 100%;
+    
 }
 
 
@@ -283,4 +283,7 @@ input, textarea, select {
     max-height: 300px;
     min-height: 150px;
     margin-top: 10px;
+}
+.edit_input{
+     width :400px;   
 }

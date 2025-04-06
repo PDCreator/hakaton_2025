@@ -83,16 +83,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <h1>Редактирование статьи</h1>
     <form method="POST" enctype="multipart/form-data">
         <label for="title">Название:</label>
-        <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($article['title']); ?>" required>
+        <input class="edit_input" type="text" id="title" name="title" value="<?php echo htmlspecialchars($article['title']); ?>" required>
         <span><?php echo $error; ?></span>
 
         <label for="content">Содержимое:</label>
         <textarea id="content" name="content"><?php echo htmlspecialchars($article['content']); ?></textarea>
 
         <label for="image">Изображение:</label>
-        <input type="file" id="image" name="image">
+        <input class=""type="file" id="image" name="image">
 
-        <button type="submit">Сохранить</button>
+        <button class="button-74" type="submit">Сохранить</button>
     </form>
 </body>
 </html>
